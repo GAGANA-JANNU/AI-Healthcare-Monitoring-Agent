@@ -1,23 +1,29 @@
 import streamlit as st
 
+# Page setup
 st.set_page_config(page_title="Healthcare Assistant", page_icon="🩺")
 
 st.title("🩺 AI Healthcare Monitoring Assistant")
 
 # Sidebar
 st.sidebar.title("🧭 Navigation")
-menu = st.sidebar.selectbox("Select Option", ["Home", "Medication", "Chatbot"])
+menu = st.sidebar.selectbox(
+    "Select Option",
+    ["Home", "Medication", "Chatbot", "Health Check"]
+)
 
 # ---------------- HOME ----------------
 if menu == "Home":
     st.header("🏠 Welcome")
 
-    st.write("💙 Get Well Soon! Your health matters to us.")
+    st.image(
+        "https://cdn.pixabay.com/photo/2020/04/10/18/07/doctor-5025288_1280.png",
+        width=300
+    )
 
-    # Image
-    st.image("https://cdn.pixabay.com/photo/2020/04/10/18/07/doctor-5025288_1280.png", width=300)
-
-    st.info("This app helps you track medicines and get basic health suggestions.")
+    st.success("💙 Get Well Soon! Stay healthy and safe.")
+    st.info("This app helps track medicines, check health, and get basic advice.")
+    st.warning("⚠️ Disclaimer: This is not a medical diagnosis tool.")
 
 # ---------------- MEDICATION ----------------
 elif menu == "Medication":
@@ -33,7 +39,7 @@ elif menu == "Medication":
 
     with col1:
         if st.button("➕ Add Medicine"):
-            if med_name != "":
+            if med_name:
                 st.session_state.med_list.append((med_name, time))
                 st.success(f"{med_name} added at {time}")
             else:
@@ -54,67 +60,72 @@ elif menu == "Medication":
 
 # ---------------- CHATBOT ----------------
 elif menu == "Chatbot":
-    st.header("🤖 Health Chatbot")
+    st.header("🤖 Smart Health Chatbot")
 
-    user_input = st.text_input("Ask your health question")
+    user_input = st.text_input("Describe your symptoms")
 
     if user_input:
         user_input = user_input.lower()
+        severity = "Low"
 
-        # Fever
-        if "fever" in user_input or "temperature" in user_input:
-            st.success("🌡️ You may have fever.")
-            st.write("👉 Drink plenty of water 💧")
-            st.write("👉 Take rest 🛌")
+        if "fever" in user_input:
+            severity = "Medium"
+            st.success("🌡️ Fever detected")
+            st.write("👉 Drink water and take rest")
 
-        # Headache
+        elif "chest pain" in user_input:
+            severity = "High"
+            st.error("🚨 Possible serious condition!")
+            st.write("👉 Seek immediate medical help")
+
         elif "headache" in user_input:
-            st.success("💆 Headache detected.")
-            st.write("👉 Take rest 😴")
-            st.write("👉 Avoid screens 📱")
+            st.success("💆 Headache")
+            st.write("👉 Rest and stay hydrated")
 
-        # Cold
-        elif "cold" in user_input:
-            st.success("🤧 Cold symptoms.")
-            st.write("👉 Warm fluids ☕")
-            st.write("👉 Steam inhalation ♨️")
-
-        # Cough
-        elif "cough" in user_input:
-            st.success("😷 Cough detected.")
-            st.write("👉 Honey + warm water 🍯")
-
-        # Throat pain
         elif "throat" in user_input:
-            st.success("😖 Throat pain.")
-            st.write("👉 Gargle warm salt water 🧂")
-            st.write("👉 Drink warm liquids ☕")
+            st.success("😖 Throat pain")
+            st.write("👉 Warm salt water gargle")
 
-        # Teeth pain
-        elif "teeth" in user_input or "tooth" in user_input:
-            st.success("🦷 Tooth pain.")
-            st.write("👉 Rinse with warm salt water")
-            st.write("👉 Avoid very cold or hot food")
+        elif "tooth" in user_input:
+            st.success("🦷 Tooth pain")
+            st.write("👉 Avoid cold food and visit dentist if severe")
 
-        # Muscle pain
         elif "muscle" in user_input:
-            st.success("💪 Muscle pain.")
-            st.write("👉 Take rest 🛌")
-            st.write("👉 Apply warm compress 🔥")
+            st.success("💪 Muscle pain")
+            st.write("👉 Rest and apply heat")
 
-        # Stomach
         elif "stomach" in user_input:
-            st.success("🍲 Stomach issue.")
-            st.write("👉 Eat light food 🍚")
-            st.write("👉 Drink water 💧")
+            severity = "Medium"
+            st.success("🍲 Stomach issue")
+            st.write("👉 Eat light food and stay hydrated")
 
-        # General
-        elif "not feeling well" in user_input:
-            st.info("😷 You may feel unwell.")
-            st.write("👉 Take rest 🛌")
-            st.write("👉 Stay hydrated 💧")
+        elif "bmi" in user_input:
+            st.info("📊 Please go to 'Health Check' section to calculate BMI.")
 
         else:
-            st.warning("⚠️ Please consult a doctor for proper advice.")
+            st.warning("⚠️ Unknown condition")
+            st.write("👉 Please consult a doctor")
 
+        st.info(f"🧠 Severity Level: {severity}")
         st.info("💙 Get well soon! Take care.")
+
+# ---------------- HEALTH CHECK (BMI) ----------------
+elif menu == "Health Check":
+    st.header("📊 BMI Health Calculator")
+
+    weight = st.number_input("Enter your weight (kg)", min_value=0.0)
+    height = st.number_input("Enter your height (meters)", min_value=0.0)
+
+    if st.button("Calculate BMI"):
+        if height > 0:
+            bmi = weight / (height ** 2)
+            st.success(f"Your BMI is: {round(bmi, 2)}")
+
+            if bmi < 18.5:
+                st.warning("⚠️ Underweight")
+            elif 18.5 <= bmi < 25:
+                st.success("✅ Normal weight")
+            else:
+                st.error("⚠️ Overweight")
+        else:
+            st.warning("Enter valid height")
